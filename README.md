@@ -17,28 +17,36 @@ What this includes:
 ### Prerequisites
 - Node.js 18+
 - npm 9+
-- Prismic repository access
+- No Prismic auth is required for the default public repo (`moss-finance-guide-blog`)
 
-### Install dependencies
+### Quick start (use existing public content)
+### 1) Install dependencies
 ```bash
 npm install
 ```
 
-### Environment variables
+### 2) Environment variables
 Create `.env.local` and set:
 
 ```bash
 # optional: if omitted, repo name falls back to slicemachine.config.json
 NEXT_PUBLIC_PRISMIC_ENVIRONMENT=moss-finance-guide-blog
 
-# used for absolute canonical/OG/sitemap URLs
+# optional in local dev, recommended for absolute canonical/OG/sitemap URLs
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-### Run development server
+### 3) Run development server
 ```bash
 npm run dev
 ```
+
+Open `http://localhost:3000/blog`.
+
+### Use your own Prismic repo (optional)
+- Set `NEXT_PUBLIC_PRISMIC_ENVIRONMENT` to your repo name.
+- Create and publish matching content models (`blog_post`, `author`) and documents.
+- If your repo is private, add an access token configuration in `createClient` in `prismicio.ts`.
 
 ### Build for production
 ```bash
