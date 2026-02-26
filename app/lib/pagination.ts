@@ -7,6 +7,12 @@ type PaginationResult<T> = {
 
 type PageParam = string | string[] | undefined;
 
+type PaginationToken = number | "ellipsis";
+
+function range(start: number, end: number): number[] {
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+}
+
 export function getBlogPageHref(page: number, category?: string) {
   const params = new URLSearchParams();
 
@@ -30,6 +36,49 @@ export function resolvePageParam(pageParam: PageParam): number {
   return Number.isFinite(requestedPage) && requestedPage > 0
     ? requestedPage
     : 1;
+}
+
+export function getPaginationTokens(
+  currentPage: number,
+  totalPages: number,
+  siblingCount = 1,
+): PaginationToken[] {
+  if (totalPages <= 0) return [];
+
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const totalPageNumbers = siblingCount * 2 + 5;
+
+  if (totalPages <= totalPageNumbers) return range(1, totalPages);
+
+  const leftSiblingIndex = Math.max(safeCurrentPage - siblingCount, 1);
+  const rightSiblingIndex = Math.min(
+    safeCurrentPage + siblingCount,
+    totalPages,
+  );
+  const shouldShowLeftDots = leftSiblingIndex > 2;
+  const shouldShowRightDots = rightSiblingIndex < totalPages - 1;
+
+  if (!shouldShowLeftDots && shouldShowRightDots) {
+    const leftItemCount = 3 + siblingCount * 2;
+    return [...range(1, leftItemCount), "ellipsis", totalPages];
+  }
+
+  if (shouldShowLeftDots && !shouldShowRightDots) {
+    const rightItemCount = 3 + siblingCount * 2;
+    return [
+      1,
+      "ellipsis",
+      ...range(totalPages - rightItemCount + 1, totalPages),
+    ];
+  }
+
+  return [
+    1,
+    "ellipsis",
+    ...range(leftSiblingIndex, rightSiblingIndex),
+    "ellipsis",
+    totalPages,
+  ];
 }
 
 export function paginateByParam<T>(
