@@ -1,7 +1,8 @@
 import ArticleCard from "@/app/components/blog/ArticleCard";
 import CategoryFilter from "@/app/components/blog/CategoryFilter";
+import FeaturedArticleCarousel from "@/app/components/blog/FeaturedArticleCarousel";
 import Pagination from "@/app/components/blog/Pagination";
-import { getAllArticles } from "@/app/lib/articles";
+import { getAllArticles, getFeaturedArticles } from "@/app/lib/articles";
 import { getCategoryFilterState } from "@/app/lib/categories";
 import { paginateByParam } from "@/app/lib/pagination";
 
@@ -18,9 +19,11 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const query = await searchParams;
 
   const articles = await getAllArticles();
+  const featuredArticles = getFeaturedArticles(articles);
 
   const { categories, activeCategory, filteredArticles } =
     getCategoryFilterState(articles, query.category);
+
   const {
     items: paginatedArticles,
     page,
@@ -36,6 +39,8 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
             A finance blog by Moss
           </p>
         </div>
+
+        <FeaturedArticleCarousel articles={featuredArticles} />
 
         <h2 className="mt-12 mb-4 text-2xl font-semibold">Latest Articles</h2>
         <CategoryFilter

@@ -1,6 +1,6 @@
 import { type Content } from "@prismicio/client";
+import { formatPublishedDate } from "@/app/lib/date";
 import { createClient } from "@/prismicio";
-import { formatPublishedDate } from "./date";
 
 export async function getAllArticles() {
   const client = createClient();
@@ -8,6 +8,19 @@ export async function getAllArticles() {
   return client.getAllByType("blog_post", {
     orderings: [{ field: "my.blog_post.published_date", direction: "desc" }],
   });
+}
+
+export function getFeaturedArticles(
+  articles: Content.BlogPostDocument[],
+  limit = 5,
+) {
+  const featuredArticles = articles.filter(({ data }) => data.featured);
+
+  if (featuredArticles.length > 0) {
+    return featuredArticles.slice(0, limit);
+  }
+
+  return articles.slice(0, limit);
 }
 
 type ArticleData = {
