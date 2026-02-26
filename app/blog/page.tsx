@@ -1,8 +1,21 @@
 import ArticleCard from "@/app/components/blog/ArticleCard";
+import CategoryFilter from "@/app/components/blog/CategoryFilter";
 import { getAllArticles } from "@/app/lib/articles";
+import { getCategoryFilterState } from "@/app/lib/categories";
 
-export default async function BlogPage() {
+type BlogPageProps = {
+  searchParams: Promise<{
+    category?: string | string[];
+  }>;
+};
+
+export default async function BlogPage({ searchParams }: BlogPageProps) {
+  const query = await searchParams;
+
   const articles = await getAllArticles();
+
+  const { categories, activeCategory, filteredArticles } =
+    getCategoryFilterState(articles, query.category);
 
   return (
     <main id="main-content" className="min-h-screen bg-zinc-50">
@@ -15,10 +28,14 @@ export default async function BlogPage() {
         </div>
 
         <h2 className="mt-12 mb-4 text-2xl font-semibold">Latest Articles</h2>
+        <CategoryFilter
+          categories={categories}
+          selectedCategory={activeCategory}
+        />
 
-        {articles.length > 0 ? (
+        {filteredArticles.length > 0 ? (
           <ul className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {articles.map((article) => (
+            {filteredArticles.map((article) => (
               <ArticleCard key={article.uid} article={article} />
             ))}
           </ul>
