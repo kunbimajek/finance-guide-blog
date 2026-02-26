@@ -10,10 +10,25 @@ import {
   getArticleByUID,
   getArticleData,
 } from "@/app/lib/articles";
+import {
+  buildArticleMetadata,
+  buildMissingArticleMetadata,
+} from "@/app/lib/seo";
 
 type BlogArticlePageProps = {
   params: Promise<{ uid: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: BlogArticlePageProps): Promise<Metadata> {
+  const { uid } = await params;
+  const article = await getArticleByUID(uid).catch(() => null);
+
+  if (!article) return buildMissingArticleMetadata();
+
+  return buildArticleMetadata(article);
+}
 
 export default async function BlogArticlePage({
   params,
