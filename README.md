@@ -19,29 +19,31 @@ What this includes:
 - npm 9+
 - No Prismic auth is required for the default public repo (`moss-finance-guide-blog`)
 
-### Quick start (use existing public content)
+### Quick start
 ### 1) Install dependencies
 ```bash
 npm install
 ```
 
-### 2) Environment variables
-Create `.env.local` and set:
-
-```bash
-# optional: if omitted, repo name falls back to slicemachine.config.json
-NEXT_PUBLIC_PRISMIC_ENVIRONMENT=moss-finance-guide-blog
-
-# optional in local dev, recommended for absolute canonical/OG/sitemap URLs
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-```
-
-### 3) Run development server
+### 2) Run development server
 ```bash
 npm run dev
 ```
 
+### 3) Open the app
 Open `http://localhost:3000/blog`.
+
+### Optional environment configuration
+Create `.env.local` only if you want to override defaults:
+
+```bash
+# optional: use a different Prismic repo than slicemachine.config.json
+NEXT_PUBLIC_PRISMIC_ENVIRONMENT=moss-finance-guide-blog
+
+# optional in local dev; recommended in deployed environments
+# for canonical/OG/sitemap absolute URLs
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
 
 ### Use your own Prismic repo (optional)
 - Set `NEXT_PUBLIC_PRISMIC_ENVIRONMENT` to your repo name.
