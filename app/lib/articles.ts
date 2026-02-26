@@ -1,4 +1,4 @@
-import { type Content } from "@prismicio/client";
+import { isFilled, type Content } from "@prismicio/client";
 import { formatPublishedDate } from "@/app/lib/date";
 import { createClient } from "@/prismicio";
 
@@ -21,6 +21,12 @@ export function getFeaturedArticles(
   }
 
   return articles.slice(0, limit);
+}
+
+export async function getArticleByUID(uid: string) {
+  const client = createClient();
+
+  return client.getByUID("blog_post", uid);
 }
 
 type ArticleData = {
@@ -48,4 +54,19 @@ export function getArticleData(article: Content.BlogPostDocument): ArticleData {
     readTimeMinutes: article.data.read_time_minutes ?? null,
     heroImage: article.data.hero_image,
   };
+}
+
+export async function getArticleAuthorData(
+  author: Content.BlogPostDocument["data"]["author"],
+): Promise<ArticleAuthorData | null> {
+  if (!isFilled.contentRelationship(author)) return null;
+
+  if (author.data) return author.data;
+
+  const client = createClient();
+  const authorDocument = await client
+    .getByID<Content.AuthorDocument>(author.id)
+    .catch(() => null);
+
+  return authorDocument?.data ?? null;
 }
