@@ -1,37 +1,149 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Finance Guide Blog System Case Study
+Frontend implementation of a CMS-driven finance blog using Next.js + Prismic.
 
-## Getting Started
+What this includes:
 
-First, run the development server:
+- blog listing page
+- article details page
+- category filtering
+- pagination (3 per page)
+- breadcrumbs
+- featured carousel
+- SEO metadata + sitemap + robots
+- component tests
 
+## Instructions For Running The Code
+
+### Prerequisites
+- Node.js 18+
+- npm 9+
+- Prismic repository access
+
+### Install dependencies
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment variables
+Create `.env.local` and set:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# optional: if omitted, repo name falls back to slicemachine.config.json
+NEXT_PUBLIC_PRISMIC_ENVIRONMENT=moss-finance-guide-blog
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# used for absolute canonical/OG/sitemap URLs
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
 
-## Learn More
+### Run development server
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Build for production
+```bash
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Start production server
+```bash
+npm run start
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Run tests
+```bash
+npm test
+```
 
-## Deploy on Vercel
+### Run lint
+```bash
+npm run lint
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Brief Explanation Of The Implementation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# finance-guide-blog
+I built the assignment with Next.js App Router and Prismic as the CMS source of truth.
+
+The app has two main routes:
+
+- `/blog` for listing, category filtering, featured carousel, and pagination
+- `/blog/[uid]` for the article details page
+
+Home (`/`) redirects to `/blog`, so the blog is the default entry.
+
+For data flow, I kept display logic and data/query logic separated:
+
+- `app/components/blog/*` handles UI components
+- `app/lib/*` handles utilities (articles, categories, pagination, date formatting, SEO)
+
+Filtering and pagination are URL-driven (`category` + `page` query params), so state is shareable and refresh-safe.
+
+SEO is implemented with dynamic article metadata (`generateMetadata`) and fallback rules:
+
+- use `meta_title`, `meta_description`, `meta_image` when available
+- fallback to article title/excerpt/hero image when needed
+
+I also added:
+
+- `metadataBase` in root layout
+- `sitemap.xml` and `robots.txt`
+- loading skeletons for listing and article routes
+
+### Testing
+I added component tests with React Testing Library + Jest for:
+
+- `ArticleCard`
+- `CategoryFilter`
+- `Pagination`
+- `FeaturedArticleCarousel`
+
+The tests cover CMS-shaped rendering + user behavior (filter changes, pagination links, carousel controls).
+
+## Architectural Decisions And Trade-offs
+
+### What I chose and why
+
+- **Next.js App Router with server-first pages**  
+  I kept `/blog` and `/blog/[uid]` as server-rendered pages so content and metadata are available on first response, which helps SEO and keeps data-fetching logic straightforward.
+
+- **Component/UI separation from domain utilities**  
+  I split UI into `app/components/blog/*` and logic into `app/lib/*` to keep components focused on rendering and helpers focused on filtering, pagination, date formatting, and metadata.
+
+- **URL-based state for category + pagination**  
+  I used query params (`category`, `page`) so state is shareable, bookmarkable, and refresh-safe.
+
+### Key trade-offs
+
+- **Simple listing logic over API-level filtering/pagination**  
+  The listing currently fetches blog posts then applies filtering/pagination in app logic. This is clean for case-study scope, but for larger datasets I would move this fully to query-level pagination/filtering.
+
+- **Component tests over broader integration coverage**  
+  I prioritized component behavior tests for critical UI paths. This keeps the suite small and fast, but production would benefit from additional integration/E2E coverage.
+
+- **Tailwind CSS for speed**  
+  I used Tailwind because it helped me move fast and ship this case study quickly. In a bigger project, utility classes can get messy and harder to maintain. If this was a larger product, I’d build a proper design system from scratch, probably using SCSS modules for better structure and consistency.
+
+## Production Considerations
+
+### What I implemented (and why)
+
+- **Discoverability / SEO**  
+  I implemented dynamic metadata generation per article (`generateMetadata` + SEO helpers), canonical URLs, Open Graph/Twitter metadata, `sitemap.xml`, and `robots.txt`.  
+  Why: improves crawlability, indexing clarity, and social sharing quality for a public blog.
+
+- **Performance**  
+  I used server-rendered pages, loading skeletons for listing/article routes, and lazy image loading by default in the shared image wrapper.  
+  Why: improves perceived speed and reduces unnecessary initial payload on content-heavy pages.
+
+- **Accessibility**  
+  I added labeled form controls, skip-to-content navigation, visible focus states on interactive elements, carousel keyboard support (left/right), ARIA labels/current states, and breadcrumb current-page semantics.  
+  Why: improves keyboard/screen-reader usability and makes core navigation/interaction usable for more users.
+
+### What I would improve next for production
+
+- Move filtering/pagination fully to Prismic API query level for scale.
+- Secure on-demand revalidation with a secret and scoped invalidation logic.
+- Add `BlogPosting` structured data (JSON-LD) for richer search results.
+- Add E2E tests for critical flows (filter, paginate, open article, carousel controls).
+- Add localization/i18n routing and translated content support.
+- Add CI quality gates (lint + typecheck + tests) on pull requests.
